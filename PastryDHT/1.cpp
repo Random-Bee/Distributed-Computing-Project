@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include <sys/wait.h>
 #include <zmq.hpp>
+#include <openssl/evp.h>
 #include <semaphore.h>
 #include <sys/time.h>
 using namespace std;
@@ -11,6 +12,8 @@ const string base_endpoint = "tcp://127.0.0.1:";
 
 int n, b = 4, base = 16, id;
 string nodeId;
+
+unordered_map<string, string> table;
 
 // List of sockets for sending messages to other processes
 zmq::socket_t* senders;
@@ -82,34 +85,186 @@ string convertByteToHex(vector<bool> byte) {
     return hex;
 }
 
+string getHash(const string& str) {
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(ctx, str.c_str(), str.length());
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned int digestLength;
+    EVP_DigestFinal_ex(ctx, digest, &digestLength);
+    EVP_MD_CTX_free(ctx);
+    char sha256String[digestLength+1];
+    for(int i = 0; i < digestLength/2; i++) {
+        sprintf(&sha256String[i*2], "%02x", (unsigned int)digest[i]);
+    }
+    return string(sha256String);
+}
+
 // distance function to calculate distance between two nodes
-__int128_t distance(string a, string b) {
+unsigned __int128 distance(string a, string b) {
     vector<bool> byteA = convertHexToByte(a);
     vector<bool> byteB = convertHexToByte(b);
-    __int128_t dist = 0;
+    unsigned __int128 x = 0, y = 0;
     for(int i = 0; i < byteA.size(); i++) {
-        dist = dist * 2 + (byteA[i] ^ byteB[i]);
+        x = x * 2 + byteA[i];
     }
-    return dist;
+    for(int i = 0; i < byteB.size(); i++) {
+        y = y * 2 + byteB[i];
+    }
+    if (x > y) {
+        return x - y;
+    } else {
+        return y - x;
+    }
 }
 
 void generateNodeId() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    long long int micros = tv.tv_sec * 1000000 + tv.tv_usec;
-    srand(micros);
-    string hex = "";
-    for(int i = 0; i < 32; i++) {
-        hex += (char)(rand() % 16);
-    }
-    nodeId = convertByteToHex(convertHexToByte(hex));
+    nodeId = getHash(base_endpoint + to_string(id));
 }
 
 vector<vector<string>> routing_table;
 vector<vector<int>> corr_machine;
 vector<vector<pair<string,int>>> leaf_set;
 
-int joinCount = 0;
+void send(int dest, string message) {
+    zmq::message_t msg(message.size());
+    memcpy(msg.data(), message.c_str(), message.size());
+    senders[dest].send(msg, zmq::send_flags::none);
+}
+
+void route(string key, string value, int sender) {
+    string hash = getHash(key);
+    vector<bool> byte = convertHexToByte(hash);
+    // Check if key can be routed to some node in the routing table
+    int comPre = 0;
+    for(int i = 0; i < nodeId.size(); i++) {
+        if(nodeId[i] == hash[i]) {
+            comPre++;
+        } else {
+            break;
+        }
+    }
+    bool found = false;
+    if(comPre < log(n, base)) {
+        int row = comPre;
+        int col;
+        if(hash[comPre] >= '0' && hash[comPre] <= '9') {
+            col = hash[comPre] - '0';
+        } else {
+            col = hash[comPre] - 'a' + 10;
+        }
+        if(routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash)) {
+            cout << "Using table Routing key: " << key << " value: " << value << " to node: " << corr_machine[row][col] << endl;
+            string message = "store " + to_string(sender) + " " + key + " " + value;
+            send(corr_machine[row][col], message);
+            found = true;
+        }
+    }
+    if(!found) {
+        // Check if key can be routed to some node in the leaf set, i.e., distance between hash and nodeId is less than distance between hash and current node
+        unsigned __int128 minDist = distance(nodeId, hash);
+        int closestNode = -1;
+        for(int i=0; i<leaf_set.size(); i++) {
+            for(int j=0; j<leaf_set[i].size(); j++) {
+                unsigned __int128 dist = distance(leaf_set[i][j].first, hash);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closestNode = leaf_set[i][j].second;
+                }
+            }
+        }
+        if(closestNode != -1) {
+            cout << "Using set Routing key: " << key << " value: " << value << " to node: " << closestNode << endl;
+            string message = "store " + to_string(sender) + " " + key + " " + value;
+            send(closestNode, message);
+            found = true;
+        }
+    }
+    if(!found) {
+        // Store the key in the current node
+        table[key] = value;
+        string message = "log " + to_string(id) + " " + key + " " + value;
+        send(sender, message);
+    }
+}
+
+void prt(unsigned __int128 x) {
+    string s = "";
+    while(x > 0) {
+        s += (char)(x % 10 + '0');
+        x /= 10;
+    }
+    reverse(s.begin(), s.end());
+    cout << s << endl;
+}
+
+void fetch(string key, int sender) {
+    string hash = getHash(key);
+    vector<bool> byte = convertHexToByte(hash);
+    // Check if key can be routed to some node in the routing table
+    int comPre = 0;
+    for(int i = 0; i < nodeId.size(); i++) {
+        if(nodeId[i] == hash[i]) {
+            comPre++;
+        } else {
+            break;
+        }
+    }
+    bool found = false;
+    if(comPre < log(n, base)) {
+        int row = comPre;
+        int col;
+        if(hash[comPre] >= '0' && hash[comPre] <= '9') {
+            col = hash[comPre] - '0';
+        } else {
+            col = hash[comPre] - 'a' + 10;
+        }
+        if(routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash)) {
+            cout << "Using table Routing key: " << key << " to node: " << corr_machine[row][col] << endl;
+            string message = "retrieve " + to_string(id) + " " + key;
+            prt(distance(nodeId, hash));
+            send(corr_machine[row][col], message);
+            found = true;
+        }
+    }
+    if(!found) {
+        // Check if key can be routed to some node in the leaf set, i.e., distance between hash and nodeId is less than distance between hash and current node
+        unsigned __int128 minDist = distance(nodeId, hash);
+        cout << "MinDist: ";
+        prt(minDist);
+        int closestNode = -1;
+        for(int i=0; i<leaf_set.size(); i++) {
+            for(int j=0; j<leaf_set[i].size(); j++) {
+                unsigned __int128 dist = distance(leaf_set[i][j].first, hash);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closestNode = leaf_set[i][j].second;
+                }
+            }
+        }
+        if(closestNode != -1) {
+            cout << "Using set Routing key: " << key << " to node: " << closestNode << endl;
+            string message = "retrieve " + to_string(id) + " " + key;
+            prt(minDist);
+            send(closestNode, message);
+            found = true;
+        }
+    }
+    if(!found) {
+        // Check for the key in the current node
+        for(auto x: table) {
+            cout << x.first << " " << x.second << endl;
+        }
+        if(table.find(key) == table.end()) {
+            string message = "fail " + to_string(id) + " " + key;
+            send(sender, message);
+        }
+        else {
+            string message = "success " + to_string(id) + " " + key + " " + table[key];
+            send(sender, message);
+        }
+    }
+}
 
 void receive() {
     while(1) {
@@ -120,7 +275,6 @@ void receive() {
         string type, sender;
         ss >> type >> sender;
         if(type == "join") {
-            joinCount++;
             string reqId;
             ss >> reqId;
             // add node to routing table if possible
@@ -157,17 +311,37 @@ void receive() {
             if(leaf_set[1].size() > base) {
                 leaf_set[1].erase(leaf_set[1].begin());
             }
-            if(joinCount == n-1) {
-                break;
-            }
+        }
+        else if(type == "store") {
+            string key, value;
+            ss >> key >> value;
+            route(key, value, stoi(sender));
+        }
+        else if(type == "retrieve") {
+            string key;
+            ss >> key;
+            fetch(key, stoi(sender));
+        }
+        else if(type == "fail") {
+            string key;
+            ss >> key;
+            cout << "Key: " << key << " not found in " << sender << endl;
+        }
+        else if(type == "success") {
+            string key, value;
+            ss >> key >> value;
+            cout << "Key: " << key << " value: " << value << " found in node: " << sender << endl;
+        }
+        else if(type == "log") {
+            string key, value;
+            ss >> key >> value;
+            table[key] = value;
+            cout << "Stored key: " << key << " value: " << value << " in node: " << sender << endl;
+        }
+        else if(type == "exit") {
+            break;
         }
     }
-}
-
-void send(int dest, string message) {
-    zmq::message_t msg(message.size());
-    memcpy(msg.data(), message.c_str(), message.size());
-    senders[dest].send(msg, zmq::send_flags::none);
 }
 
 void init_tables() {
@@ -181,6 +355,43 @@ void join() {
     for(int i=0; i<n; i++) {
         if(i == id) continue;
         send(i, message);
+    }
+}
+
+
+void doWork() {
+    while(1) {
+        // cout << "Choose function" << endl;
+        // cout << "1. Store Data" << endl;
+        // cout << "2. Retrieve Data" << endl;
+        // cout << "3. Exit" << endl;
+        int choice;
+        cin >> choice;
+
+        if(choice==1) {
+            string key, value;
+            cout << "Enter key: ";
+            cin >> key;
+            cout << "Enter value: ";
+            cin >> value;
+            route(key, value, id);
+        }
+        else if(choice==2) {
+            string key;
+            cout << "Enter key: ";
+            cin >> key;
+            fetch(key, id);
+        }
+        else if(choice==3) {
+            string message = "exit " + to_string(id);
+            for(int i=0; i<n; i++) {
+                send(i, message);
+            }
+            break;
+        }
+        else {
+            cout << "Invalid choice" << endl;
+        }
     }
 }
 
@@ -198,7 +409,7 @@ int main() {
 
     fclose(file);
 
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < n-1; i++) {
         if(fork() == 0) {
             break;
         }
@@ -206,19 +417,20 @@ int main() {
 
     id = i;
 
-    if(i==n) {
+    if(i==n-1) {
         init();
-        // cout << "Choose function" << endl;
-        // cout << "1. Store Data" << endl;
-        // cout << "2. Retrieve Data" << endl;
-        // cout << "3. Exit" << endl;
-        // int choice;
-        // cin >> choice;
-
-        for(i=0; i<n; i++) {
+        generateNodeId();
+        init_tables();
+        thread t(receive);
+        sleep(1);
+        join();
+        sleep(1);
+        thread t1(doWork);
+        t.join();
+        t1.join();
+        for(i=0; i<n-1; i++) {
             wait(NULL);
         }
-        cout << "All processes are ready" << endl;
     }
     else {
         init();
@@ -228,24 +440,6 @@ int main() {
         sleep(1);
         join();
         t.join();
-
-        if(id==0) {
-            cout << "Node ID: " << nodeId << " " << id << endl;
-            cout << "Routing Table: " << endl;
-            for(int i = 0; i < routing_table.size(); i++) {
-                for(int j = 0; j < routing_table[i].size(); j++) {
-                    cout << routing_table[i][j] << " ";
-                }
-                cout << endl;
-            }
-            cout << "Leaf Set: " << endl;
-            for(int i = 0; i < leaf_set.size(); i++) {
-                for(int j = 0; j < leaf_set[i].size(); j++) {
-                    cout << leaf_set[i][j].first << " ";
-                }
-                cout << endl;
-            }
-        }
     }
 
     for(int i=0; i<=n; i++) {
