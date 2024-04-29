@@ -8,10 +8,21 @@
 using namespace std;
 
 // Base endpoint for all the processes
-const string base_endpoint = "tcp://127.0.0.1:";
+vector<string> base_endpoint = {};
+
+// Size of machine Numbers
+int num_machine;
+
+string getAddress(int id){
+    int machineNo = id%num_machine;
+    int portNo = 5555 + id/num_machine;
+    string address = base_endpoint[machineNo] + ":" + to_string(portNo);
+    return address;
+}
 
 // Number of processes and id of the current process
 int n, id;
+
 
 // Node id of the current process: sha256(base_endpoint + id)
 string nodeId;
@@ -35,13 +46,13 @@ void init()
     senders = new zmq::socket_t[n + 1];
     context = zmq::context_t(1);
     receiver = zmq::socket_t(context, ZMQ_PULL);
-    receiver.bind(base_endpoint + to_string(5555 + id));
+    receiver.bind(getAddress(id));
     // 0 to n-1 processes are workers
     // n-th process is parent process, it will send completion message to all processes
     for (int i = 0; i <= n; i++)
     {
         senders[i] = zmq::socket_t(context, ZMQ_PUSH);
-        senders[i].connect(base_endpoint + to_string(5555 + i));
+        senders[i].connect(getAddress(i));
     }
 }
 
@@ -129,7 +140,7 @@ string getHash(const string &str)
 // Generate node id of the current process
 void generateNodeId()
 {
-    nodeId = getHash(base_endpoint + to_string(id));
+    nodeId = getHash(getAddress(id));
 }
 
 // Send message to a process

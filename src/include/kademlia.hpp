@@ -56,9 +56,6 @@ int minDistanceNode(string hash)
         if (routing_table[i].size() > 0)
         {
             unsigned __int128 dist = distance(routing_table[i].front(), hash);
-            cout << "Distance between " << routing_table[i].front() << " and " << hash << " is ";
-            prt(dist);
-            cout << endl;
             if (dist < minDist)
             {
                 minDist = dist;
@@ -76,7 +73,6 @@ void route(string key, string value, int sender)
     // Check if key can be routed to some node in the routing table
     // For kadmelia, we need to find the node with the closest distance to the key
     int minDistNodeId = minDistanceNode(hash);
-    cout << "Min dist node: " << minDistNodeId << endl;
     if (minDistNodeId != id)
     {
         string message = "store " + to_string(sender) + " " + key + " " + value;

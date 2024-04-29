@@ -18,7 +18,8 @@ void receive()
         {
             string reqId;
             ss >> reqId;
-            if(rem_nodes.find(stoi(sender)) == rem_nodes.end()) {
+            if (rem_nodes.find(stoi(sender)) == rem_nodes.end())
+            {
                 continue;
             }
             join(reqId, sender);
@@ -27,10 +28,12 @@ void receive()
             send(stoi(sender), message);
             rem_nodes.erase(stoi(sender));
         }
-        else if(type == "ack") {
+        else if (type == "ack")
+        {
             joined++;
         }
-        else if(type == "ready") {
+        else if (type == "ready")
+        {
             ready++;
         }
         else if (type == "store")
@@ -71,18 +74,22 @@ void receive()
     }
 }
 
-void wait_for_all() {
-    for(int i=0; i<n; i++) {
-        if(i == id) continue;
+void wait_for_all()
+{
+    for (int i = 0; i < n; i++)
+    {
+        if (i == id)
+            continue;
         rem_nodes.insert(i);
     }
-    while(joined < n-1) {
+    while (joined < n - 1)
+    {
         join();
         // wait before sending join request again
         sleep(1);
     }
-    string message = "ready " + to_string(n-1);
-    send(n-1, message);
+    string message = "ready " + to_string(n - 1);
+    send(n - 1, message);
 }
 
 void doWork()
@@ -136,8 +143,16 @@ void doWork()
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        cout << "Usage: ./main <machine Number>" << endl;
+        return 0;
+    }
+
+    int machineNo = stoi(argv[1]);
+
     int i;
 
     FILE *file = fopen("inp.txt", "r");
@@ -149,11 +164,42 @@ int main()
     }
 
     fscanf(file, "%d", &n);
-
+    while (1)
+    {
+        string s;
+        char c;
+        while (1)
+        {
+            fscanf(file, "%c", &c);
+            if (c == '\n')
+                break;
+            else if (c == ' ')
+                continue;
+            s += c;
+        }
+        if (s.length() != 0){
+            s = "tcp://" + s;
+            base_endpoint.push_back(s);
+        }
+        if (feof(file))
+            break;
+    }
     fclose(file);
 
+    num_machine = base_endpoint.size();
+    if (num_machine <= 0)
+    {
+        cout << "No machine found" << endl;
+        return 0;
+    }
+
+    cout << num_machine << ":" << machineNo << endl;
     for (i = 0; i < n - 1; i++)
     {
+        cout << i << "," << getAddress(i) << endl;
+
+        if (i % num_machine != machineNo)
+            continue;
         if (fork() == 0)
         {
             break;
@@ -169,7 +215,8 @@ int main()
         init_tables();
         thread t(receive);
         wait_for_all();
-        while(ready < n);
+        while (ready < n)
+            ;
         thread t1(doWork);
         t.join();
         t1.join();
