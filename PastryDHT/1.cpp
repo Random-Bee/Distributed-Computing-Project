@@ -266,6 +266,10 @@ void fetch(string key, int sender) {
     }
 }
 
+set<int> rem_nodes;
+int joined = 0;
+int ready = 0;
+
 void receive() {
     while(1) {
         zmq::message_t msg;
@@ -277,6 +281,9 @@ void receive() {
         if(type == "join") {
             string reqId;
             ss >> reqId;
+            if(rem_nodes.find(stoi(sender)) == rem_nodes.end()) {
+                continue;
+            }
             // add node to routing table if possible
             int comPre = 0;
             for(int i = 0; i < nodeId.size(); i++) {
@@ -311,6 +318,16 @@ void receive() {
             if(leaf_set[1].size() > base) {
                 leaf_set[1].erase(leaf_set[1].begin());
             }
+            // send ack to the sender
+            string message = "ack " + to_string(id);
+            send(stoi(sender), message);
+            rem_nodes.erase(stoi(sender));
+        }
+        else if(type == "ack") {
+            joined++;
+        }
+        else if(type == "ready") {
+            ready++;
         }
         else if(type == "store") {
             string key, value;
@@ -358,13 +375,27 @@ void join() {
     }
 }
 
+void wait_for_all() {
+    for(int i=0; i<n; i++) {
+        if(i == id) continue;
+        rem_nodes.insert(i);
+    }
+    while(joined < n-1) {
+        join();
+        // wait before sending join request again
+        sleep(1);
+    }
+    string message = "ready " + to_string(n-1);
+    send(n-1, message);
+}
+
 
 void doWork() {
+    cout << "Choose function" << endl;
+    cout << "1. Store Data" << endl;
+    cout << "2. Retrieve Data" << endl;
+    cout << "3. Exit" << endl;
     while(1) {
-        // cout << "Choose function" << endl;
-        // cout << "1. Store Data" << endl;
-        // cout << "2. Retrieve Data" << endl;
-        // cout << "3. Exit" << endl;
         int choice;
         cin >> choice;
 
@@ -422,9 +453,8 @@ int main() {
         generateNodeId();
         init_tables();
         thread t(receive);
-        sleep(1);
-        join();
-        sleep(1);
+        wait_for_all();
+        while(ready < n);
         thread t1(doWork);
         t.join();
         t1.join();
@@ -437,8 +467,7 @@ int main() {
         generateNodeId();
         init_tables();
         thread t(receive);
-        sleep(1);
-        join();
+        wait_for_all();
         t.join();
     }
 
