@@ -1,5 +1,9 @@
 #include "./include/kademlia.hpp"
 
+int joined = 0;
+int ready = 0;
+set<int> rem_nodes;
+
 void receive()
 {
     while (1)
@@ -14,7 +18,20 @@ void receive()
         {
             string reqId;
             ss >> reqId;
+            if(rem_nodes.find(stoi(sender)) == rem_nodes.end()) {
+                continue;
+            }
             join(reqId, sender);
+            // send ack to the sender
+            string message = "ack " + to_string(id);
+            send(stoi(sender), message);
+            rem_nodes.erase(stoi(sender));
+        }
+        else if(type == "ack") {
+            joined++;
+        }
+        else if(type == "ready") {
+            ready++;
         }
         else if (type == "store")
         {
@@ -54,14 +71,28 @@ void receive()
     }
 }
 
+void wait_for_all() {
+    for(int i=0; i<n; i++) {
+        if(i == id) continue;
+        rem_nodes.insert(i);
+    }
+    while(joined < n-1) {
+        join();
+        // wait before sending join request again
+        sleep(1);
+    }
+    string message = "ready " + to_string(n-1);
+    send(n-1, message);
+}
+
 void doWork()
 {
+    cout << "\n\nChoose function" << endl;
+    cout << "1. Store Data" << endl;
+    cout << "2. Retrieve Data" << endl;
+    cout << "3. Exit" << endl;
     while (1)
     {
-        // cout << "\n\nChoose function" << endl;
-        // cout << "1. Store Data" << endl;
-        // cout << "2. Retrieve Data" << endl;
-        // cout << "3. Exit" << endl;
         int choice;
         cin >> choice;
 
@@ -137,9 +168,8 @@ int main()
         generateNodeId();
         init_tables();
         thread t(receive);
-        sleep(1);
-        join();
-        sleep(1);
+        wait_for_all();
+        while(ready < n);
         thread t1(doWork);
         t.join();
         t1.join();
@@ -154,8 +184,7 @@ int main()
         generateNodeId();
         init_tables();
         thread t(receive);
-        sleep(1);
-        join();
+        wait_for_all();
         t.join();
     }
 
