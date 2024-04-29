@@ -89,7 +89,10 @@ void wait_for_all()
         sleep(1);
     }
     string message = "ready " + to_string(n - 1);
-    send(n - 1, message);
+    for (int i = 0; i < num_machine; i++)
+    {
+        send(i, message);
+    }
 }
 
 void doWork()
@@ -194,21 +197,21 @@ int main(int argc, char *argv[])
     }
 
     cout << num_machine << ":" << machineNo << endl;
-    for (i = 0; i < n - 1; i++)
+    for (i = machineNo + num_machine; i <= n - 1; i += num_machine)
     {
-        cout << i << "," << getAddress(i) << endl;
-
-        if (i % num_machine != machineNo)
-            continue;
+        // cout << i << "," << getAddress(i) << endl;
         if (fork() == 0)
         {
+            id = i;
             break;
+        }
+        else
+        {
+            id = machineNo;
         }
     }
 
-    id = i;
-
-    if (i == n - 1)
+    if (id == machineNo)
     {
         init();
         generateNodeId();
@@ -220,7 +223,7 @@ int main(int argc, char *argv[])
         thread t1(doWork);
         t.join();
         t1.join();
-        for (i = 0; i < n - 1; i++)
+        for (i = machineNo + num_machine; i <= n - 1; i += num_machine)
         {
             wait(NULL);
         }
