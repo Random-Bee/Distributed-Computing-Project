@@ -69,7 +69,7 @@ void route(string key, string value, int sender, int hops)
         }
         if (routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash))
         {
-            // cout << "Using table Routing key: " << key << " value: " << value << " to node: " << corr_machine[row][col] << endl;
+            cout << "Using table Routing key: " << key << " value: " << value << " from" << id << " to node: " << corr_machine[row][col] << endl;
             // string message = "store " + to_string(sender) + " " + key + " " + value;
             string message = messageCreator("store", sender, key, hops + 1, value);
             send(corr_machine[row][col], message);
@@ -95,7 +95,7 @@ void route(string key, string value, int sender, int hops)
         }
         if (closestNode != -1)
         {
-            // cout << "Using set Routing key: " << key << " value: " << value << " to node: " << closestNode << endl;
+            cout << "Using set Routing key: " << key << " value: " << value << " from" << id << " to node: " << closestNode << endl;
             // string message = "store " + to_string(sender) + " " + key + " " + value;
             string message = messageCreator("store", sender, key, hops + 1, value);
             send(closestNode, message);
@@ -106,10 +106,9 @@ void route(string key, string value, int sender, int hops)
     {
         // Store the key in the current node
         table[key] = value;
+        key_resp++;
         // string message = "log " + to_string(id) + " " + key + " " + value;
         string message = messageCreator("log", id, key, hops + 1, value);
-        if (hops == 4)
-            cout << key << "\n";
         printLogFile(hops);
         send(sender, message);
     }
@@ -148,9 +147,9 @@ void fetch(string key, int sender, int hops)
         }
         if (routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash))
         {
-            // cout << "Using table Routing key: " << key << " to node: " << corr_machine[row][col] << endl;
+            cout << "Using table Routing key: " << key << " from" << id << " to node: " << corr_machine[row][col] << endl;
             // string message = "retrieve " + to_string(id) + " " + key;
-            string message = messageCreator("retrieve", id, key, hops + 1);
+            string message = messageCreator("retrieve", sender, key, hops + 1);
             // prt(distance(nodeId, hash));
             send(corr_machine[row][col], message);
             found = true;
@@ -177,9 +176,9 @@ void fetch(string key, int sender, int hops)
         }
         if (closestNode != -1)
         {
-            // cout << "Using set Routing key: " << key << " to node: " << closestNode << endl;
+            cout << "Using set Routing key: " << key << " from" << id << " to node: " << closestNode << endl;
             // string message = "retrieve " + to_string(id) + " " + key;
-            string message = messageCreator("retrieve", id, key, hops + 1);
+            string message = messageCreator("retrieve", sender, key, hops + 1);
             // prt(minDist);
             send(closestNode, message);
             found = true;
@@ -201,9 +200,6 @@ void fetch(string key, int sender, int hops)
         {
             // string message = "success " + to_string(id) + " " + key + " " + table[key];
             string message = messageCreator("success", id, key, hops + 1, table[key]);
-            if (hops == 4)
-
-                cout << key << "\n";
             printLogFile(hops);
 
             send(sender, message);

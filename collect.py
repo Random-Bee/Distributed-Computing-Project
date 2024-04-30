@@ -14,7 +14,7 @@ def write_data():
 
 
 nodes = [4, 8, 16, 32, 64, 128, 256]
-curr = "pastry"
+curr = "kademlia"
 
 def run_and_collect():
     for node in nodes:
@@ -25,7 +25,10 @@ def run_and_collect():
             os.system(f"echo '127.0.0.1' >> ./bin/inp.txt;")
             os.system(f"cd ./bin; ./main 0")
             os.system("mkdir -p data")
-            os.system(f"cp ./bin/log.txt ./data/log_{curr}_{node}_{i}.txt")   
+            os.system(f"mv ./bin/log.txt ./data/log_{curr}_{node}_{i}.txt")   
+            os.system(f"mv ./bin/key.txt ./data/key_{curr}_{node}_{i}.txt")
+            os.system(f"mv ./bin/time.txt ./data/time_{curr}_{node}_{i}.txt")
+            
         
 if __name__ == "__main__":
     run_and_collect()

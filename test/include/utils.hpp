@@ -5,15 +5,34 @@
 #include <openssl/evp.h>
 #include <semaphore.h>
 #include <sys/time.h>
+#include "time.hpp"
 using namespace std;
 
 #define LOG_FILE "log.txt"
+#define TIME_FILE "time.txt"
+#define KEY_FILE "key.txt"
 ofstream logFile = ofstream(LOG_FILE, ios::app);
+
+int key_resp = 0;
 
 void printLogFile(int hops)
 {
     string s = to_string(hops) + "\n";
     logFile << s;
+}
+
+void printkeyFile()
+{
+    string s = to_string(key_resp) + "\n";
+    ofstream keyFile = ofstream(KEY_FILE, ios::app);
+    keyFile << s;
+}
+
+void printTimeFile(string start, string end){
+    long long diff = diffTime(start, end);
+    string s = to_string(diff) + "\n";
+    ofstream timeFile = ofstream(TIME_FILE, ios::app);
+    timeFile << s;
 }
 
 // Base endpoint for all the processes

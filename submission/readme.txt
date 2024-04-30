@@ -30,7 +30,10 @@ To run the project on multiple systems, you need to manually compile the project
 <Number of Nodes>
 <IP Address of Machine 0>
 <IP Address of Machine 1>
+
 ...
+
+Make sure that there is a newline at the end of the file.
 
 To run the generated binary, use the following command:
 

@@ -83,6 +83,7 @@ void route(string key, string value, int sender, int hops)
     {
 
         table[key] = value;
+        key_resp++;
         string message = messageCreator("log", id, key, hops+1, value);
         printLogFile(hops);
         send(sender, message);
@@ -101,7 +102,7 @@ void fetch(string key, int sender, int hops)
     {
         cout << "Using table Routing key: " << key << " to node: " << minDistNode << endl;
         // Send the key to the node with the closest distance
-        string message = messageCreator("retrieve", id, key, hops+1);
+        string message = messageCreator("retrieve", sender, key, hops+1);
         send(minDistNode, message);
     }
     else

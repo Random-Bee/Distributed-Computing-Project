@@ -1,8 +1,10 @@
-#include "./include/pastry.hpp"
+#include "./include/kademlia.hpp"
 
 int joined = 0;
 int ready = 0;
 set<int> rem_nodes;
+
+string start_time, end_time;
 
 void receive()
 {
@@ -61,6 +63,8 @@ void receive()
         {
             string key, value, hops;
             ss >> key >> value >> hops;
+            end_time = getSysTime();
+
             // cout << "Key: " << key << " value: " << value << " found in node: " << sender << endl;
         }
         else if (type == "log")
@@ -68,10 +72,13 @@ void receive()
             string key, value, hops;
             ss >> key >> value >> hops;
             table[key] = value;
+            end_time = getSysTime();
+
             // cout << "Stored key: " << key << " value: " << value << " in node: " << sender << endl;
         }
         else if (type == "exit")
         {
+            printkeyFile();
             break;
         }
     }
@@ -104,6 +111,7 @@ void doWork()
 {
     test.open("inp-data.txt");
     string s;
+    start_time = getSysTime();
     while (getline(test, s))
     {
         // cout << s << "\n";
@@ -121,14 +129,14 @@ void doWork()
             ss >> key;
             // cout << "Enter value: ";
             ss >> value;
-            route(key, value, id, 1);
+            route(key, value, id, 0);
         }
         else if (choice == 2)
         {
             string key;
             // cout << "Enter key: ";
             ss >> key;
-            fetch(key, id, 1);
+            fetch(key, id, 0);
         }
         else if (choice == 3)
         {
@@ -156,6 +164,7 @@ void doWork()
             cout << "Invalid choice" << endl;
         }
     }
+    printTimeFile(start_time, end_time);
 }
 
 int main(int argc, char *argv[])

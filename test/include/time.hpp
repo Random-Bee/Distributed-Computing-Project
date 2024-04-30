@@ -52,3 +52,18 @@ string getSysTime()
     return s;
 }
 
+long long diffTime(string s1, string s2){
+    int hr1 = stoi(s1.substr(0, 2));
+    int min1 = stoi(s1.substr(3, 2));
+    int sec1 = stoi(s1.substr(6, 2));
+    int mil1 = stoi(s1.substr(9, 3));
+    int mic1 = stoi(s1.substr(13, 3));
+    int hr2 = stoi(s2.substr(0, 2));
+    int min2 = stoi(s2.substr(3, 2));
+    int sec2 = stoi(s2.substr(6, 2));
+    int mil2 = stoi(s2.substr(9, 3));
+    int mic2 = stoi(s2.substr(13, 3));
+    cout << s1 << " " << s2 << endl;
+    long long diff = (hr2 - hr1) * 3600000000 + (min2 - min1) * 60000000 + (sec2 - sec1) * 1000000 + (mil2 - mil1) * 1000 + (mic2 - mic1);
+    return diff;
+}
