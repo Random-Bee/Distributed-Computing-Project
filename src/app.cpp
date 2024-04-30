@@ -33,7 +33,10 @@ void init()
     context = zmq::context_t(1);
     sender = zmq::socket_t(context, ZMQ_PUSH);
     receiver = zmq::socket_t(context, ZMQ_PULL);
-    sender.connect("tcp://127.0.0.1:5555");
+    string sendAdr = base_endpoint;
+    while(sendAdr.back() != ':') sendAdr.pop_back();
+    sendAdr += "5555";
+    sender.connect(sendAdr);
     receiver.bind(base_endpoint);
 }
 
