@@ -1,6 +1,7 @@
 FOLDER_REPORT_FINAL = ./final_evaluation
 FOLDER_REPORT_MID_TERM = ./mid_term_evaluation
 FOLDER_SRC = ./src
+TEST_SRC = ./test
 BIN_FILE = ./bin/main
 NODES = 60
 M1=127.0.0.1
@@ -15,8 +16,11 @@ run: $(BIN_FILE)
 compile:
 	$(MAKE) -C $(FOLDER_SRC)
 
+compile_test:
+	$(MAKE) -C $(TEST_SRC)
+
 # Take number of nodes as input
-test: 
+test: compile_test
 	python data.py
 	cp ./inp-data.txt ./bin/inp-data.txt
 	touch ./bin/inp.txt; echo ${NODES} > ./bin/inp.txt;
