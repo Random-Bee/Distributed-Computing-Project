@@ -97,6 +97,7 @@ void doWork()
                         cout << "Press a number < 10 to get a fact" << endl;
                         cin >> inp;
                     }
+                    cout << "Logged out" << endl;
                 }
                 else
                 {
@@ -132,7 +133,6 @@ void doWork()
         }
         else if (choice == 3)
         {
-            cout << "Logged out" << endl;
             break;
         }
         else

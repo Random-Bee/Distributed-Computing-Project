@@ -1,4 +1,4 @@
-#include "./include/pastry.hpp"
+#include "./include/kademlia.hpp"
 
 int joined = 0;
 int ready = 0;
@@ -97,32 +97,12 @@ void wait_for_all()
 
 void doWork()
 {
-    cout << "\n\nChoose function" << endl;
-    cout << "1. Store Data" << endl;
-    cout << "2. Retrieve Data" << endl;
-    cout << "3. Exit" << endl;
+    cout << "Enter 0 to exit" << endl;
     while (1)
     {
-        int choice;
+        string choice;
         cin >> choice;
-
-        if (choice == 1)
-        {
-            string key, value;
-            cout << "Enter key: ";
-            cin >> key;
-            cout << "Enter value: ";
-            cin >> value;
-            // route(key, value, id);
-        }
-        else if (choice == 2)
-        {
-            string key;
-            cout << "Enter key: ";
-            cin >> key;
-            // fetch(key, id);
-        }
-        else if (choice == 3)
+        if (choice == "0")
         {
             string message = "exit " + to_string(id);
             for (int i = 0; i < n; i++)
@@ -131,17 +111,6 @@ void doWork()
             }
             break;
         }
-        // else if (choice == 4)
-        // {
-        //     printRoutingTable();
-        // }
-        // else if (choice == 5)
-        // {
-        //     printCorrMachine();
-        // }
-        // else if (choice == 6){
-        //     printTable();
-        // }
         else
         {
             cout << "Invalid choice" << endl;
@@ -199,10 +168,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    cout << num_machine << ":" << machineNo << endl;
     for (i = machineNo + num_machine; i <= n - 1; i += num_machine)
     {
-        // cout << i << "," << getAddress(i) << endl;
         if (fork() == 0)
         {
             id = i;
@@ -216,6 +183,7 @@ int main(int argc, char *argv[])
 
     if (id == machineNo)
     {
+        cout << "Initializing" << endl;
         init();
         generateNodeId();
         init_tables();
@@ -223,6 +191,7 @@ int main(int argc, char *argv[])
         wait_for_all();
         while (ready < n)
             ;
+        cout << "Ready" << endl;
         thread t1(doWork);
         t.join();
         t1.join();

@@ -66,7 +66,7 @@ int minDistanceNode(string hash)
     return corrMachine;
 }
 
-void route(string key, string value, int sender)
+void route(string key, string value, string sender)
 {
     string hash = getHash(key);
     vector<bool> byte = convertHexToByte(hash);
@@ -76,20 +76,29 @@ void route(string key, string value, int sender)
     if (minDistNodeId != id)
     {
         cout << "Using table Routing key: " << key << " value: " << value << " to node: " << minDistNodeId << endl;
-        string message = "store " + to_string(sender) + " " + key + " " + value;
+        string message = "store " + sender + " " + key + " " + value;
         send(minDistNodeId, message);
     }
     else
     {
 
-        table[key] = value;
-        string message = "log " + to_string(id) + " " + key + " " + value;
-        send(sender, message);
+        // table[key] = value;
+        // string message = "log " + to_string(id) + " " + key + " " + value;
+        // send(sender, message);
+        if(table.find(key) == table.end()) {
+            table[key] = value;
+            string message = "success " + to_string(id) + " " + key + " " + value;
+            sendToApp(sender, message);
+        }
+        else {
+            string message = "fail " + to_string(id) + " " + key;
+            sendToApp(sender, message);
+        }
     }
 }
 
 // Fetch value of a key from the network
-void fetch(string key, int sender)
+void fetch(string key, string sender)
 {
     string hash = getHash(key);
     vector<bool> byte = convertHexToByte(hash);
@@ -100,25 +109,21 @@ void fetch(string key, int sender)
     {
         cout << "Using table Routing key: " << key << " to node: " << minDistNode << endl;
         // Send the key to the node with the closest distance
-        string message = "retrieve " + to_string(id) + " " + key;
+        string message = "retrieve " + sender + " " + key;
         send(minDistNode, message);
     }
     else
     {
         // Check for the key in the current node
-        for (auto x : table)
-        {
-            cout << x.first << " " << x.second << endl;
-        }
         if (table.find(key) == table.end())
         {
             string message = "fail " + to_string(id) + " " + key;
-            send(sender, message);
+            sendToApp(sender, message);
         }
         else
         {
             string message = "success " + to_string(id) + " " + key + " " + table[key];
-            send(sender, message);
+            sendToApp(sender, message);
         }
     }
 }

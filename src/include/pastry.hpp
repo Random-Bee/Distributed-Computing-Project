@@ -158,8 +158,6 @@ void fetch(string key, string sender)
     {
         // Check if key can be routed to some node in the leaf set, i.e., distance between hash and nodeId is less than distance between hash and current node
         unsigned __int128 minDist = distance(nodeId, hash);
-        cout << "MinDist: ";
-        prt(minDist);
         int closestNode = -1;
         for (int i = 0; i < leaf_set.size(); i++)
         {
@@ -177,13 +175,13 @@ void fetch(string key, string sender)
         {
             cout << "Using set Routing key: " << key << " to node: " << closestNode << endl;
             string message = "retrieve " + sender + " " + key;
-            prt(minDist);
             send(closestNode, message);
             found = true;
         }
     }
     if (!found)
     {
+        // Check for the key in the current node
         if (table.find(key) == table.end())
         {
             string message = "fail " + to_string(id) + " " + key;
