@@ -1,4 +1,3 @@
-
 #include <bits/stdc++.h>
 #include <sys/wait.h>
 #include <zmq.hpp>
@@ -149,6 +148,15 @@ void send(int dest, string message)
     zmq::message_t msg(message.size());
     memcpy(msg.data(), message.c_str(), message.size());
     senders[dest].send(msg, zmq::send_flags::none);
+}
+
+// Send message to application process
+void sendToApp(string adr, string msg) {
+    zmq::socket_t sender(context, ZMQ_PUSH);
+    sender.connect(adr);
+    zmq::message_t message(msg.size());
+    memcpy(message.data(), msg.c_str(), msg.size());
+    sender.send(message, zmq::send_flags::none);
 }
 
 // Print unsigned __int128

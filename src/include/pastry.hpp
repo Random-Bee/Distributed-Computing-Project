@@ -37,7 +37,7 @@ unsigned __int128 distance(string a, string b)
     }
 }
 
-void route(string key, string value, int sender)
+void route(string key, string value, string sender)
 {
     string hash = getHash(key);
     vector<bool> byte = convertHexToByte(hash);
@@ -70,7 +70,7 @@ void route(string key, string value, int sender)
         if (routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash))
         {
             cout << "Using table Routing key: " << key << " value: " << value << " to node: " << corr_machine[row][col] << endl;
-            string message = "store " + to_string(sender) + " " + key + " " + value;
+            string message = "store " + sender + " " + key + " " + value;
             send(corr_machine[row][col], message);
             found = true;
         }
@@ -95,22 +95,27 @@ void route(string key, string value, int sender)
         if (closestNode != -1)
         {
             cout << "Using set Routing key: " << key << " value: " << value << " to node: " << closestNode << endl;
-            string message = "store " + to_string(sender) + " " + key + " " + value;
+            string message = "store " + sender + " " + key + " " + value;
             send(closestNode, message);
             found = true;
         }
     }
     if (!found)
     {
-        // Store the key in the current node
-        table[key] = value;
-        string message = "log " + to_string(id) + " " + key + " " + value;
-        send(sender, message);
+        if(table.find(key) == table.end()) {
+            table[key] = value;
+            string message = "success " + to_string(id) + " " + key + " " + value;
+            sendToApp(sender, message);
+        }
+        else {
+            string message = "fail " + to_string(id) + " " + key;
+            sendToApp(sender, message);
+        }
     }
 }
 
 // Fetch the value of a key from the network
-void fetch(string key, int sender)
+void fetch(string key, string sender)
 {
     string hash = getHash(key);
     vector<bool> byte = convertHexToByte(hash);
@@ -143,7 +148,7 @@ void fetch(string key, int sender)
         if (routing_table[row][col] != "" && distance(routing_table[row][col], hash) < distance(nodeId, hash))
         {
             cout << "Using table Routing key: " << key << " to node: " << corr_machine[row][col] << endl;
-            string message = "retrieve " + to_string(id) + " " + key;
+            string message = "retrieve " + sender + " " + key;
             prt(distance(nodeId, hash));
             send(corr_machine[row][col], message);
             found = true;
@@ -171,7 +176,7 @@ void fetch(string key, int sender)
         if (closestNode != -1)
         {
             cout << "Using set Routing key: " << key << " to node: " << closestNode << endl;
-            string message = "retrieve " + to_string(id) + " " + key;
+            string message = "retrieve " + sender + " " + key;
             prt(minDist);
             send(closestNode, message);
             found = true;
@@ -179,20 +184,15 @@ void fetch(string key, int sender)
     }
     if (!found)
     {
-        // Check for the key in the current node
-        for (auto x : table)
-        {
-            cout << x.first << " " << x.second << endl;
-        }
         if (table.find(key) == table.end())
         {
             string message = "fail " + to_string(id) + " " + key;
-            send(sender, message);
+            sendToApp(sender, message);
         }
         else
         {
             string message = "success " + to_string(id) + " " + key + " " + table[key];
-            send(sender, message);
+            sendToApp(sender, message);
         }
     }
 }

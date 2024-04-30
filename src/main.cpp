@@ -40,13 +40,13 @@ void receive()
         {
             string key, value;
             ss >> key >> value;
-            route(key, value, stoi(sender));
+            route(key, value, sender);
         }
         else if (type == "retrieve")
         {
             string key;
             ss >> key;
-            fetch(key, stoi(sender));
+            fetch(key, sender);
         }
         else if (type == "fail")
         {
@@ -113,14 +113,14 @@ void doWork()
             cin >> key;
             cout << "Enter value: ";
             cin >> value;
-            route(key, value, id);
+            // route(key, value, id);
         }
         else if (choice == 2)
         {
             string key;
             cout << "Enter key: ";
             cin >> key;
-            fetch(key, id);
+            // fetch(key, id);
         }
         else if (choice == 3)
         {
