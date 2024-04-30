@@ -36,23 +36,23 @@ header-includes:
 
 ## What is **Distributed Hashing?**
 
-Distributed hashing is a technique used in distributed computing environments to efficiently store and retrieve data across multiple nodes in a network. It combines the principles of hashing, which involves mapping data to a fixed-size value, with distribution, where data is spread across multiple nodes or machines.
+Distributed hashing is a method employed in distributed computing setups for the effective storage and retrieval of data across numerous nodes within a network. This approach integrates hashing principles, which entail assigning data to a fixed-size value, with distribution, wherein data is dispersed across various nodes or machines.
 
 Here's how it typically works:
 
-1. **Hashing**: Data is hashed using a hash function, which generates a unique identifier (hash) for each piece of data. This hash serves as the key for storing and retrieving the data.
+1. **Hashing**: The data undergoes hashing via a hash function, producing a distinct identifier (hash) for each data fragment. This hash functions as the pivotal element for both storing and retrieving the data.
 
-2. **Distribution**: The hashed data is distributed across multiple nodes in the network. Each node is responsible for storing a subset of the hashed data based on a predetermined mapping scheme.
+2. **Distribution**: The hashed data is dispersed among numerous nodes within the network. Each node assumes responsibility for storing a portion of the hashed data, determined by a predefined mapping scheme.
 
 Distributed hashing is used in various distributed systems and applications for several reasons:
 
-1. **Scalability**: It allows systems to scale horizontally by adding more nodes to the network. As the amount of data increases or the workload grows, additional nodes can be added to handle the load, without affecting the overall performance.
+1. **Scalability**: This facilitates horizontal scaling of systems by incorporating more nodes into the network. With an increase in data volume or workload, additional nodes can be introduced to manage the load seamlessly, preserving the overall performance.
 
-2. **Fault Tolerance**: Distributed hashing provides fault tolerance by replicating data across multiple nodes. If a node fails or becomes unavailable, the data can still be accessed from other nodes, ensuring high availability and reliability.
+2. **Fault Tolerance**: Distributed hashing ensures fault tolerance by duplicating data across multiple nodes. In the event of a node failure or unavailability, the data remains accessible from other nodes, guaranteeing high availability and reliability.
 
-3. **Load Balancing**: By distributing data across multiple nodes, distributed hashing helps in balancing the workload evenly across the network. This prevents any single node from becoming a bottleneck and ensures optimal performance.
+3. **Load Balancing**: Distributed hashing contributes to evenly balancing the workload across the network by dispersing data among multiple nodes. This prevents any single node from becoming a bottleneck and ensures optimal performance.
 
-Distributed hashing is used in various distributed systems and applications, including distributed databases, content delivery networks (CDNs), peer-to-peer (P2P) networks, and distributed file systems like Hadoop Distributed File System (HDFS) and Amazon S3.
+Distributed hashing finds application across diverse distributed systems and platforms, encompassing distributed databases, content delivery networks (CDNs), peer-to-peer (P2P) networks, and distributed file systems such as Hadoop Distributed File System (HDFS) and Amazon S3.
 
 \newpage
 
@@ -114,17 +114,23 @@ Key features of Pastry include:
 
 ![Pastry Routing](./pastry-table.png){width=75%}
 
-2. **Routing Table**: Each node maintains a routing table that contains information about other nodes in the network. The routing table is divided into rows and columns, with each row corresponding to a specific prefix length of the node's ID. The routing table helps in efficiently routing messages and finding nodes that are close to a given key.
+2. **Routing Table**: Each node maintains a routing table that contains information about other nodes in the network. The routing table is divided into rows and columns, with each row corresponding to a specific prefix length of the node's ID. The routing table helps in efficiently routing messages and finding nodes that are close to a given key. When the ID contains digits in base b, the routing table of a node is divided into $\lceil log_b(N) \rceil$ rows and $b$ columns, with each row corresponding to a specific prefix length. Row $i$, count starting from 0, contains nodes whose ID matches the first i digits of the node's ID. Column $j$ contains nodes whose ID has value $j$ at index $i+1$.
 
-When the ID space is divided into `b` digits, the routing table of a node is divided into `b` rows, with each row corresponding to a specific prefix length. The routing table helps in efficiently routing messages and finding nodes that are close to a given key.  
-
-3. **Leaf Set**: In addition to the routing table, each node maintains a leaf set that contains information about the nodes that are closest to it in the network. The leaf set helps in routing messages to nodes that are not present in the routing table.
+3. **Leaf Set**: In addition to the routing table, each node maintains a leaf set that contains information about the nodes whose IDs are closest to it in the network. The leaf set helps in routing messages to nodes that are not present in the routing table.
 
 4. **Message Routing**: When a node wants to find a specific piece of data, it uses the key's hash value to route the request to the node responsible for storing that data. The message is forwarded through the overlay network using the routing table and leaf set until it reaches the destination node.
 
 ![Pastry - Lookup](./pastry-lookup.png){width=75%}
 
-5. **Lookup Algorithm**: Pastry uses a recursive lookup algorithm to find the closest node to a given key. The algorithm starts by querying nodes in the routing table that are closest to the key. If the closest node does not have the data, the algorithm recursively queries other nodes that are closer to the key until the data is found. The lookup algorithm is designed to be efficient and minimize the number of messages exchanged between nodes.
+5. **Lookup Algorithm**: Each node checks if the key can be routed using routing table. If not, it uses the leaf set to route the message. If no other node in leaf set has a smaller distance to the key, the node itself is the closest node to the key. The key is then stored in the node.
+
+6. **Some Maths**:
+    - The probability that two hashes in base $b$ have a common prefix of length $l$ is $b^{-l}$.
+    - For $l = 1 + \log_b(N)$, the probability that two hashes have a common prefix of length $l$ is $P = 1/(bN)$.
+    - Thus when number of rows in the routing table is $log_b(N)$, the probability that a node is in the routing table after $log_b(N)$ hops is much smaller than 1.
+    - Thus after $log_b(N)$ hops, the message is likely to be in the leaf set of the node or the node itself. It will take 1 or 0 more hops to reach the destination in respective cases.
+
+
 
 \newpage
 
