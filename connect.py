@@ -11,7 +11,7 @@ def connect():
         # os.system(f"sshpass -p 'Student1234' ssh ubuntu@10.200.{ip_addr[i]} 'cd /home/ubuntu/Code/src; make'")
         # # if i == main:
         # os.system(f"scp ./inp.txt ubuntu@10.200.{ip_addr[i]}:/home/ubuntu/Code/bin")
-        # os.system(f"sshpass -p 'Student1234' ssh ubuntu@10.200.{ip_addr[i]} 'sudo reboot'")
+        os.system(f"sshpass -p 'Student1234' ssh ubuntu@10.200.{ip_addr[i]} 'sudo reboot'")
         
         # if i == main: 
         #     os.system(f"sshpass -p 'Student1234' ssh ubuntu@10.200.{ip_addr[i]} 'cd /home/ubuntu/Code/bin/; ./main {i}'")

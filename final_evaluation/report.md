@@ -54,6 +54,8 @@ Distributed hashing is used in various distributed systems and applications for 
 
 Distributed hashing is used in various distributed systems and applications, including distributed databases, content delivery networks (CDNs), peer-to-peer (P2P) networks, and distributed file systems like Hadoop Distributed File System (HDFS) and Amazon S3.
 
+\newpage
+
 ## A brief overview of how DHTs work
 
 There are several distributed hash table (DHT) algorithms that implement distributed hashing, each with its own unique approach to storing and retrieving data in a decentralized network. However, most DHT algorithms share some common characteristics:
@@ -64,13 +66,15 @@ There are several distributed hash table (DHT) algorithms that implement distrib
 4. **Data Replication**: DHTs replicate data across multiple nodes to ensure fault tolerance and high availability. Each piece of data is stored on multiple nodes, typically using a replication factor to determine the number of copies.
 5. **Data Retrieval**: When a node wants to retrieve a piece of data, it sends a request to the node that is visible to the node and is closest to the key. The request is forwarded through the overlay network until it reaches the node responsible for storing the data. The data is then retrieved and sent back to the requesting node.
 
+\newpage
+
 ## Kademlia
 
 Kademlia is a distributed hash table (DHT) algorithm that uses a binary tree-like structure to store and retrieve data in a decentralized network. It is designed to be scalable, fault-tolerant, and efficient, making it suitable for large-scale distributed systems.
 
 Key features of Kademlia include:
 
-![Kademlia Tree](./kademlia-tree.png)
+![Kademlia Tree](./kademlia-tree.png){width=75%}
 
 1. **Binary Tree Structure**: Kademlia organizes nodes in a binary tree-like structure, where each node is assigned a unique identifier (ID) based on a hash of its IP address. The binary tree is used to route messages between nodes and store data in a distributed manner.
 
@@ -91,13 +95,36 @@ Example of the routing table of a node with ID `0101` when 4bit address space is
 | 011           | 0110  |
 | 0100          | 0100  |
 
-![Kademlia - Lookup](./kademlia-lookup.png){width=300px}
+![Kademlia - Lookup](./kademlia-lookup.png){width=75%}
 
 4. **Lookup Algorithm**: Kademlia uses a recursive lookup algorithm to find the closest node to a given key. The algorithm starts by querying nodes in the routing table that are closest to the key. If the closest node does not have the data, the algorithm recursively queries other nodes that are closer to the key until the data is found. The lookup algorithm is designed to be efficient and minimize the number of messages exchanged between nodes.
 
 5. **Hashing Values**: The original paper uses 160-bit hashes to avoid collision and to ensure that the keys are uniformly distributed across the address space.
 
+\newpage
+
 ## Pastry
+
+Pastry is a distributed hash table (DHT) algorithm that uses a prefix-based routing mechanism to store and retrieve data in a decentralized network. It is designed to be scalable, fault-tolerant, and efficient, making it suitable for large-scale distributed systems.
+
+Key features of Pastry include:
+
+
+1. **Prefix-based Routing**: Pastry uses a prefix-based routing mechanism to route messages between nodes in the network. Each node is assigned a unique identifier (ID) based on a hash of its IP address. The ID is represented as a string of digits in a base `b` number system, where `b` is the base of the system. The ID is used to determine the position of the node in the network and to calculate the distance between nodes.
+
+![Pastry Routing](./pastry-table.png){width=75%}
+
+2. **Routing Table**: Each node maintains a routing table that contains information about other nodes in the network. The routing table is divided into rows and columns, with each row corresponding to a specific prefix length of the node's ID. The routing table helps in efficiently routing messages and finding nodes that are close to a given key.
+
+When the ID space is divided into `b` digits, the routing table of a node is divided into `b` rows, with each row corresponding to a specific prefix length. The routing table helps in efficiently routing messages and finding nodes that are close to a given key.  
+
+3. **Leaf Set**: In addition to the routing table, each node maintains a leaf set that contains information about the nodes that are closest to it in the network. The leaf set helps in routing messages to nodes that are not present in the routing table.
+
+4. **Message Routing**: When a node wants to find a specific piece of data, it uses the key's hash value to route the request to the node responsible for storing that data. The message is forwarded through the overlay network using the routing table and leaf set until it reaches the destination node.
+
+![Pastry - Lookup](./pastry-lookup.png){width=75%}
+
+5. **Lookup Algorithm**: Pastry uses a recursive lookup algorithm to find the closest node to a given key. The algorithm starts by querying nodes in the routing table that are closest to the key. If the closest node does not have the data, the algorithm recursively queries other nodes that are closer to the key until the data is found. The lookup algorithm is designed to be efficient and minimize the number of messages exchanged between nodes.
 
 \newpage
 
@@ -105,7 +132,7 @@ Example of the routing table of a node with ID `0101` when 4bit address space is
 
 ## Problem Statement
 
-In this project, we implemented two distributed hashing algorithms - **Pastry** and **Kademlia** and evaluated the performance of these algorithms based on various metrics such as the number of hops, time taken, throughput, and load balancing and used them in a real-world application.
+In this project, we implemented two distributed hashing algorithms - **Pastry** and **Kademlia** and evaluated the performance of these algorithms based on various metrics such as the number of hops, time taken, throughput, and load balancing and used them in a application.
 
 ## Approach
 
@@ -115,7 +142,7 @@ We first read the papers on Pastry and Kademlia to understand the working of the
 
 While coding the algorithms, we focused on the following key components:
 
-- **Node ID Generation**: Each node is assigned a unique identifier (ID) based on a hash of its IP address or some other identifier. The ID is used to determine the position of the node in the network and to calculate the distance between nodes. We used `openssl` to generate random node IDs for the nodes in the network.
+- **Node ID Generation**: Each node is assigned a unique identifier (ID) based on a hash of its IP address or some other identifier. The ID is used to determine the position of the node in the network and to calculate the distance between nodes. We used `openssl` to generate random node IDs for the nodes in the network. To remove any bias, we used 128-bit IDs for both Pastry and Kademlia.
 - **Routing Table**: Each node maintains a routing table that contains information about other nodes in the network. The routing table is used to efficiently route messages and find nodes that are close to a given key. We implemented the routing table as a data structure that stores information about other nodes in the network.
 - **Message Routing**: When a node wants to find a specific piece of data, it uses the key's hash value to route the request to the node responsible for storing that data. We implemented the message routing mechanism to forward messages between nodes in the network.
 - **Data Storage and Retrieval**: Each node is responsible for storing a subset of the hashed data based on the hash of the node. We implemented the data storage and retrieval mechanism to store and retrieve data in a distributed manner.
@@ -146,8 +173,7 @@ In conclusion, we:
 - Familiarized ourselves with the concept of distributed hashing
 - Studied and implemented two distributed hashing algorithms - Pastry and Kademlia
 - Evaluated the performance of these algorithms based on various metrics
-- Analyzed the strengths and weaknesses of each algorithm
-- Used both algorithms in a application to demonstrate their effectiveness in a real-world scenario
+- Used both algorithms in a small application to demonstrate their effectiveness
 
 # Reference 
 

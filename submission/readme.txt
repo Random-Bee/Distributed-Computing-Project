@@ -3,8 +3,10 @@ Dependencies:
 Make sure your system has `openssl`, the development headers, make and zeromq installed. On Ubuntu, you can install these with:
 
 ```bash
-sudo apt-get install libssl-dev make
+sudo apt-get install libssl-dev openssl make
 ```
+
+Install the cpp zeromq library as per instructions given on its site.
 
 Running the project:
 

@@ -15,6 +15,14 @@ run: $(BIN_FILE)
 compile:
 	$(MAKE) -C $(FOLDER_SRC)
 
+# Take number of nodes as input
+test: 
+	python data.py
+	cp ./inp-data.txt ./bin/inp-data.txt
+	touch ./bin/inp.txt; echo ${NODES} > ./bin/inp.txt;
+	echo ${M1} >> ./bin/inp.txt;
+	cd ./bin; ./main 0
+
 docs: 
 	$(MAKE) -C $(FOLDER_REPORT_FINAL)
 	# $(MAKE) -C $(FOLDER_REPORT_MID_TERM)
