@@ -5,7 +5,7 @@ BIN_FILE = ./bin/main
 NODES = 60
 M1=127.0.0.1
 
-all: compile
+all: compile run
 
 run: $(BIN_FILE)
 	touch ./bin/inp.txt; echo ${NODES} > ./bin/inp.txt;
