@@ -13,16 +13,16 @@ vector<string> base_endpoint = {};
 // Size of machine Numbers
 int num_machine;
 
-string getAddress(int id){
-    int machineNo = id%num_machine;
-    int portNo = 5555 + id/num_machine;
+string getAddress(int id)
+{
+    int machineNo = id % num_machine;
+    int portNo = 5555 + id / num_machine;
     string address = base_endpoint[machineNo] + ":" + to_string(portNo);
     return address;
 }
 
 // Number of processes and id of the current process
 int n, id;
-
 
 // Node id of the current process: sha256(base_endpoint + id)
 string nodeId;
@@ -173,5 +173,13 @@ void join()
         if (i == id)
             continue;
         send(i, message);
+    }
+}
+
+void printTable()
+{
+    for (auto it : table)
+    {
+        cout << it.first << " " << it.second << endl;
     }
 }

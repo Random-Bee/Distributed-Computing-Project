@@ -16,7 +16,7 @@ compile:
 	$(MAKE) -C $(FOLDER_SRC)
 
 docs: 
-	# $(MAKE) -C $(FOLDER_REPORT_FINAL)
+	$(MAKE) -C $(FOLDER_REPORT_FINAL)
 	# $(MAKE) -C $(FOLDER_REPORT_MID_TERM)
 
 clean:

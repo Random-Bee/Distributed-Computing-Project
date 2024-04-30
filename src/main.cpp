@@ -1,4 +1,4 @@
-#include "./include/kademlia.hpp"
+#include "./include/pastry.hpp"
 
 int joined = 0;
 int ready = 0;
@@ -131,14 +131,17 @@ void doWork()
             }
             break;
         }
-        else if (choice == 4)
-        {
-            printRoutingTable();
-        }
-        else if (choice == 5)
-        {
-            printCorrMachine();
-        }
+        // else if (choice == 4)
+        // {
+        //     printRoutingTable();
+        // }
+        // else if (choice == 5)
+        // {
+        //     printCorrMachine();
+        // }
+        // else if (choice == 6){
+        //     printTable();
+        // }
         else
         {
             cout << "Invalid choice" << endl;
