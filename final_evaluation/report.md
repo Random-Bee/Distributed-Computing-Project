@@ -26,7 +26,6 @@ header-includes:
   - [Problem Statement](#problem-statement)
   - [Approach](#approach)
   - [Implementation](#implementation)
-  - [Theory](#theory)
   - [Evaluation](#evaluation)
     - [Graphs](#graphs)
       - [Number of Hops](#number-of-hops)
@@ -60,8 +59,6 @@ Distributed hashing is used in various distributed systems and applications for 
 Distributed hashing finds application across diverse distributed systems and platforms, encompassing distributed databases, content delivery networks (CDNs), peer-to-peer (P2P) networks, and distributed file systems such as Hadoop Distributed File System (HDFS) and Amazon S3.
 
 \newpage
-
-
 
 ## A brief overview of how DHTs work
 
@@ -115,9 +112,22 @@ Example of the routing table of a node with ID `0101` when 4bit address space is
 7. Below is the pseudo code for the lookup algorithm:
   
 ```cpp
-```
+input: key
+output: fetch or store value
 
-\newpage
+for each node in the routing table:
+    calculate XOR distance between key and node_id
+    store the node with smallest distance
+
+if node with smallest distance == current node:
+    // current node is the closest node to the key
+    if key is to be stored:
+        store key and value
+    else:
+        fetch value
+else:
+    send message to the closest node
+```
 
 ## Pastry
 
@@ -189,10 +199,6 @@ While coding the algorithms, we focused on the following key components:
 - **Data Storage and Retrieval**: Each node is responsible for storing a subset of the hashed data based on the hash of the node. We implemented the data storage and retrieval mechanism to store and retrieve data in a distributed manner.
 - **Lookup Algorithm**: We implemented a recursive lookup algorithm to find the closest node to a given key. The algorithm starts by querying nodes in the routing table that are closest to the key and recursively queries other nodes that are closer to the key until the data is found.
 - **Evaluation Metrics**: We evaluated the performance of the algorithms based on various metrics such as the number of hops, time taken, throughput, and load balancing. We collected data on these metrics during the execution of the algorithms and analyzed the results to compare the performance of Pastry and Kademlia.
-
-## Theory
-
-| 
 
 ## Evaluation
 
