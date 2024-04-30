@@ -26,7 +26,7 @@ header-includes:
   - [Approach](#approach)
   - [Implementation](#implementation)
   - [Evaluation](#evaluation)
-  - [Graphs](#graphs)
+    - [Graphs](#graphs)
 - [Conclusion](#conclusion)
 - [Reference](#reference)
 
@@ -133,7 +133,7 @@ We evaluated the performance of Pastry and Kademlia based on the following metri
 
 These metrics help us evaluate the performance of Pastry and Kademlia in terms of efficiency, scalability, fault tolerance, and load balancing. We collected data on these metrics during the execution of the algorithms and analyzed the results to compare the performance of Pastry and Kademlia.
 
-## Graphs
+### Graphs
 1) Number of hops
 2) Time
 3) Throughput
