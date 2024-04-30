@@ -25,8 +25,12 @@ header-includes:
   - [Problem Statement](#problem-statement)
   - [Approach](#approach)
   - [Implementation](#implementation)
+  - [Theory](#theory)
   - [Evaluation](#evaluation)
     - [Graphs](#graphs)
+      - [Number of Hops](#number-of-hops)
+      - [Total Time Taken](#total-time-taken)
+      - [Load Balancing](#load-balancing)
 - [Conclusion](#conclusion)
 - [Reference](#reference)
 
@@ -101,6 +105,10 @@ Example of the routing table of a node with ID `0101` when 4bit address space is
 
 5. **Hashing Values**: The original paper uses 160-bit hashes to avoid collision and to ensure that the keys are uniformly distributed across the address space.
 
+6. **Some Maths**: 
+    - The probability that two hashes have a common prefix of length $l$ is $2^{-l}$.
+    - The numbers of rows in the routing table is fixed at the beginning and is equal to the number of bits in the address space.
+
 \newpage
 
 ## Pastry
@@ -130,8 +138,6 @@ Key features of Pastry include:
     - Thus when number of rows in the routing table is $log_b(N)$, the probability that a node is in the routing table after $log_b(N)$ hops is much smaller than 1.
     - Thus after $log_b(N)$ hops, the message is likely to be in the leaf set of the node or the node itself. It will take 1 or 0 more hops to reach the destination in respective cases.
 
-
-
 \newpage
 
 # Report
@@ -155,22 +161,95 @@ While coding the algorithms, we focused on the following key components:
 - **Lookup Algorithm**: We implemented a recursive lookup algorithm to find the closest node to a given key. The algorithm starts by querying nodes in the routing table that are closest to the key and recursively queries other nodes that are closer to the key until the data is found.
 - **Evaluation Metrics**: We evaluated the performance of the algorithms based on various metrics such as the number of hops, time taken, throughput, and load balancing. We collected data on these metrics during the execution of the algorithms and analyzed the results to compare the performance of Pastry and Kademlia.
 
+## Theory
+
+| 
+
 ## Evaluation
 
 We evaluated the performance of Pastry and Kademlia based on the following metrics:
 
 1. **Number of Hops**: The number of hops required to route a message between nodes in the network. A lower number of hops indicates more efficient routing and faster data retrieval.
 2. **Time Taken**: The time taken to route a message between nodes in the network. A lower time indicates faster data retrieval and better performance.
-3. **Throughput**: The rate at which messages are routed between nodes in the network. Higher throughput indicates better performance and scalability.
-4. **Load Balancing**: The distribution of data across multiple nodes in the network. Load balancing ensures that the workload is evenly distributed across nodes, preventing any single node from becoming a bottleneck.
+3. **Load Balancing**: The distribution of data across multiple nodes in the network. Load balancing ensures that the workload is evenly distributed across nodes, preventing any single node from becoming a bottleneck.
 
 These metrics help us evaluate the performance of Pastry and Kademlia in terms of efficiency, scalability, fault tolerance, and load balancing. We collected data on these metrics during the execution of the algorithms and analyzed the results to compare the performance of Pastry and Kademlia.
 
+The experiment included generating 400 requests of adding and searching for key-value pairs. 
+
+\newpage
+
 ### Graphs
-1) Number of hops
-2) Time
-3) Throughput
-4) Load balancing
+
+#### Number of Hops
+
+![Number of Total Hops](./hop_count.png){width=75%}
+
+The graph shows that the hop count in Pastry is less than that in Kademlia.
+
+Considering that the hop count in Pastry is bounded by $\log_{b} N$ where $b$ is the base of the number system and $N$ is the number of nodes, the hop count in Pastry is expected to be less than that in Kademlia which is bounded by $O(\log_2 N)$. 
+
+Below is the table of hop count for Pastry and Kademlia for different number of nodes:
+
+| Pastry | Kademlia |
+| ------ | -------- |
+| 145.2  | 190.8    |
+| 181.0  | 371.8    |
+| 247.6  | 511.0    |
+| 334.4  | 651.6    |
+| 371.8  | 797.6    |
+| 393.0  | 944.8    |
+| 439.8  | 1089.0   |
+
+\newpage
+
+#### Total Time Taken
+
+![Total Time Taken](./time.png){width=75%}
+
+The graph shows that the time taken in Pastry is less than that in Kademlia.
+
+Total Time taken for completing the experiment would depend on the number of hops and the computation time at each node.
+
+Following the result that the hop count in Pastry is much less than that in Kademlia, the time taken in Pastry would be less than that in Kademlia.
+
+Below is the table of time taken for Pastry and Kademlia for different number of nodes:
+
+| Pastry | Kademlia |
+| ------ | -------- |
+| 71.84  | 77.32    |
+| 102.11 | 92.17    |
+| 104.23 | 91.23    |
+| 113.67 | 98.45    |
+| 142.34 | 102.09   |
+| 138.19 | 100.72   |
+| 169.88 | 107.95   |
+
+\newpage
+
+#### Load Balancing
+
+![Max Difference in Number of Keys Assigned](./key_diff.png){width=75%}
+
+The graph shows that the difference in the number of keys assigned to the nodes is similar in both Pastry and Kademlia.
+
+The difference in the number of keys assigned to the nodes is a measure of load balancing. A smaller difference indicates better load balancing across the nodes in the network.
+
+Considering that both algorithm use a prefix based routing mechanism, the difference in the number of keys assigned to the nodes is expected to be similar in both Pastry and Kademlia.
+
+Below is the table of difference in the number of keys assigned to the nodes for Pastry and Kademlia for different number of nodes:
+
+| Pastry | Kademlia |
+| ------ | -------- |
+| 23.62  | 30.86    |
+| 16.52  | 16.84    |
+| 7.47   | 7.03     |
+| 4.87   | 5.20     |
+| 3.72   | 3.05     |
+| 2.44   | 1.68     |
+| 1.40   | 1.02     |
+
+\newpage
 
 # Conclusion
 
