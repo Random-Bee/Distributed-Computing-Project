@@ -146,6 +146,27 @@ Key features of Pastry include:
     - Thus when number of rows in the routing table is $log_b(N)$, the probability that a node is in the routing table after $log_b(N)$ hops is much smaller than 1.
     - Thus after $log_b(N)$ hops, the message is likely to be in the leaf set of the node or the node itself. It will take 1 or 0 more hops to reach the destination in respective cases.
 
+7. Below is the pseudo code for the lookup algorithm:
+
+```cpp
+input: key
+output: fetch or store value
+
+int common_prefix = length of common prefix between key and node_id
+
+if routing table has a node that has common prefix and same value of next digit:
+    send message to that node
+else if leaf set has a node with common prefix:
+    send message to that node
+else:
+    // current node is the closest node to the key
+    if key is to be stored:
+        store key and value
+    else:
+        fetch value
+
+```
+
 \newpage
 
 # Report

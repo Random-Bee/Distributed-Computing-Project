@@ -55,7 +55,6 @@ void doWork()
             cin >> key;
             cout << "Enter Password: ";
             cin >> value;
-            // fetch(key, id);
 
             string message = "retrieve " + base_endpoint + " " + key;
             zmq::message_t msg(message.size());
@@ -70,7 +69,7 @@ void doWork()
             ss >> type >> sender;
             if (type == "fail")
             {
-                cout << "User not found" << endl;
+                cout << "\nUser not found" << endl;
             }
             else
             {
@@ -78,7 +77,7 @@ void doWork()
                 ss >> k1 >> v1;
                 if (v1 == value)
                 {
-                    cout << "Login successful" << endl;
+                    cout << "\nLogin successful" << endl;
                     cout << "Type exit to logout" << endl;
                     cout << "Press a number < 10 to get a fact" << endl;
                     string inp;
@@ -97,11 +96,11 @@ void doWork()
                         cout << "Press a number < 10 to get a fact" << endl;
                         cin >> inp;
                     }
-                    cout << "Logged out" << endl;
+                    cout << "\nLogged out" << endl;
                 }
                 else
                 {
-                    cout << "Incorrect password" << endl;
+                    cout << "\nIncorrect password" << endl;
                 }
             }
         }
@@ -112,7 +111,6 @@ void doWork()
             cin >> key;
             cout << "Enter Password: ";
             cin >> value;
-            // route(key, value, id);
             string message = "store " + base_endpoint + " " + key + " " + value;
             zmq::message_t msg(message.size());
             memcpy(msg.data(), message.c_str(), message.size());
@@ -125,10 +123,10 @@ void doWork()
             string type, sender;
             ss >> type >> sender;
             if(type == "success") {
-                cout << "User created" << endl;
+                cout << "\nUser created" << endl;
             }
             else {
-                cout << "User already exists" << endl;
+                cout << "\nUser already exists" << endl;
             }
         }
         else if (choice == 3)
@@ -137,7 +135,7 @@ void doWork()
         }
         else
         {
-            cout << "Invalid choice" << endl;
+            cout << "\nInvalid choice" << endl;
         }
     }
 }
