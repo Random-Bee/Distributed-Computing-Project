@@ -75,11 +75,13 @@ void route(string key, string value, int sender)
     int minDistNodeId = minDistanceNode(hash);
     if (minDistNodeId != id)
     {
+        cout << "Using table Routing key: " << key << " value: " << value << " to node: " << minDistNodeId << endl;
         string message = "store " + to_string(sender) + " " + key + " " + value;
         send(minDistNodeId, message);
     }
     else
     {
+
         table[key] = value;
         string message = "log " + to_string(id) + " " + key + " " + value;
         send(sender, message);
@@ -96,6 +98,7 @@ void fetch(string key, int sender)
     int minDistNode = minDistanceNode(hash);
     if (minDistNode != id)
     {
+        cout << "Using table Routing key: " << key << " to node: " << minDistNode << endl;
         // Send the key to the node with the closest distance
         string message = "retrieve " + to_string(id) + " " + key;
         send(minDistNode, message);
