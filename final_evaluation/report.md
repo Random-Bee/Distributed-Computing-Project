@@ -9,6 +9,7 @@ fontsize: 12pt
 header-includes:
     - \usepackage{setspace}
     - \onehalfspacing
+    - \usepackage{algpseudocode}
 ---
 
 <!-- ![IIT Hyderabad](https://www.iith.ac.in/images/logo.png){ width=50% } -->
@@ -60,6 +61,8 @@ Distributed hashing finds application across diverse distributed systems and pla
 
 \newpage
 
+
+
 ## A brief overview of how DHTs work
 
 There are several distributed hash table (DHT) algorithms that implement distributed hashing, each with its own unique approach to storing and retrieving data in a decentralized network. However, most DHT algorithms share some common characteristics:
@@ -108,6 +111,11 @@ Example of the routing table of a node with ID `0101` when 4bit address space is
 6. **Some Maths**: 
     - The probability that two hashes have a common prefix of length $l$ is $2^{-l}$.
     - The numbers of rows in the routing table is fixed at the beginning and is equal to the number of bits in the address space.
+
+7. Below is the pseudo code for the lookup algorithm:
+  
+```cpp
+```
 
 \newpage
 
