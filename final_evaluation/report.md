@@ -46,7 +46,7 @@ Here's how it typically works:
 
 1. **Hashing**: The data undergoes hashing via a hash function, producing a distinct identifier (hash) for each data fragment. This hash functions as the pivotal element for both storing and retrieving the data.
 
-2. **Distribution**: The hashed data is dispersed among numerous nodes within the network. Each node assumes responsibility for storing a portion of the hashed data, determined by a predefined mapping scheme.
+2. **Distribution**: The hashed data is transmitted to one of the nodes within the network based on the hash value. The node responsible for storing the data is determined by the hash value, ensuring that the data is evenly distributed across the network.
 
 Distributed hashing is used in various distributed systems and applications for several reasons:
 
