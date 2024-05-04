@@ -7,4 +7,4 @@ Members:
 
 For the description of the project, refer to the [Project Proposal](./mid_term_evaluation/idea.md)
 
-The detailed report of the project can be found [here](./final-report/report.md)
+The detailed report of the project can be found [here](./final_evaluation/report.md)
